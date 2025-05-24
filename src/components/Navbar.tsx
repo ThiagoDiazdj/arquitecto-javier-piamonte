@@ -1,4 +1,6 @@
 import { useState } from "react";
+import emailjs from '@emailjs/browser';
+import { useRef } from 'react';
 
 interface Project {
     id: number;
@@ -19,6 +21,9 @@ interface Service {
 const ArchitectWebsite = () => {
     const [isMenuOpen, setIsMenuOpen] = useState<boolean>(false);
     const [selectedProject, setSelectedProject] = useState<Project | null>(null);
+    const [isSubmitting, setIsSubmitting] = useState(false);
+    const [submitStatus, setSubmitStatus] = useState('');
+    const formRef = useRef<HTMLFormElement>(null);
 
     const projects: Project[] = [
         {
@@ -82,8 +87,28 @@ const ArchitectWebsite = () => {
         }
     ];
 
-    const handleContactSubmit = () => {
-        alert('¡Gracias por tu mensaje! Te contactaré pronto.');
+    const handleContactSubmit = async (e: React.FormEvent) => {
+        e.preventDefault();
+        setIsSubmitting(true);
+        setSubmitStatus('');
+
+        try {
+            await emailjs.sendForm(
+            'service_tskk5mh', // Tu Service ID
+            'template_dmz7x8n', // Tu Template ID
+            formRef.current!,
+            'CQlfK5Gu5F0OpfY3s' // Tu Public Key
+        );
+
+        setSubmitStatus('success');
+        formRef.current!.reset();
+        setTimeout(() => setSubmitStatus(''), 5000);
+    } catch (error) {
+        setSubmitStatus('error');
+        setTimeout(() => setSubmitStatus(''), 5000);
+    } finally {
+        setIsSubmitting(false);
+    }
     };
 
     return (
@@ -93,25 +118,38 @@ const ArchitectWebsite = () => {
                 <div className="container mx-auto px-4">
                     <div className="flex justify-between items-center py-4">
                         <div className="flex items-center space-x-3">
-                            <div className="w-12 h-12 bg-gradient-to-br from-red-700 to-black rounded-xl flex items-center justify-center shadow-lg shadow-red-700/30">
-                                <span className="text-white font-bold text-xl">JP</span>
+                             <div className="w-12 h-12 bg-gradient-to-br from-red-700 to-black rounded-xl flex items-center justify-center shadow-lg shadow-red-700/30">
+                            <span className="text-white font-bold text-xl">JP</span>
                             </div>
-                            <h1 className="text-3xl font-bold text-gray-900">Javier Piamonte</h1>
-                        </div>
+                            <h1 className="text-2xl md:text-3xl font-bold text-gray-900">Javier Piamonte</h1>
+                         </div>
 
+                        {/* Botón hamburguesa mejorado */}
                         <button 
-                            onClick={() => setIsMenuOpen(!isMenuOpen)}
-                            className="md:hidden text-gray-900 hover:text-gray-600 transition-colors p-2 rounded-lg"
-                        >
-                            <span className="text-2xl">{isMenuOpen ? '✕' : '☰'}</span>
+                        onClick={() => setIsMenuOpen(!isMenuOpen)}
+                        className="md:hidden text-gray-900 hover:text-gray-600 transition-colors p-2 rounded-lg z-50"
+                    >
+                <span className="text-2xl">{isMenuOpen ? '✕' : '☰'}</span>
                         </button>
 
-                        <ul className={`md:flex gap-8 ${isMenuOpen ? "flex" : "hidden"} absolute md:static bg-white/98 md:bg-transparent backdrop-blur-xl md:backdrop-blur-none w-full md:w-auto left-0 top-full md:top-auto flex-col md:flex-row p-6 md:p-0 shadow-2xl md:shadow-none border-t md:border-0 border-gray-100`}>
-                        <li><a href="#inicio" className="block py-2 md:py-0 text-gray-700 hover:text-gray-900 font-medium transition-colors">Inicio</a></li>
-                            <li><a href="#proyectos" className="block py-2 md:py-0 text-gray-700 hover:text-gray-900 font-medium transition-colors">Proyectos</a></li>
-                            <li><a href="#servicios" className="block py-2 md:py-0 text-gray-700 hover:text-gray-900 font-medium transition-colors">Servicios</a></li>
-                            <li><a href="#sobre-mi" className="block py-2 md:py-0 text-gray-700 hover:text-gray-900 font-medium transition-colors">Sobre Mí</a></li>
-                            <li><a href="#contacto" className="block py-2 md:py-0 bg-gradient-to-r from-red-700 to-black text-white px-6 py-3 rounded-full hover:from-red-700 hover:to-black transition-all duration-300 shadow-lg shadow-red-500/40 hover:shadow-xl hover:shadow-red-500/60 hover:-translate-y-0.5 font-semibold">Contacto</a></li>
+                        {/* Menú desktop */}
+                        <ul className="hidden md:flex gap-8">
+                        <li><a href="#inicio" className="text-gray-700 hover:text-gray-900 font-medium transition-colors">Inicio</a></li>
+                        <li><a href="#proyectos" className="text-gray-700 hover:text-gray-900 font-medium transition-colors">Proyectos</a></li>
+                        <li><a href="#servicios" className="text-gray-700 hover:text-gray-900 font-medium transition-colors">Servicios</a></li>
+                        <li><a href="#sobre-mi" className="text-gray-700 hover:text-gray-900 font-medium transition-colors">Sobre Mí</a></li>
+                        <li><a href="#contacto" className="bg-gradient-to-r from-red-700 to-black text-white px-6 py-3 rounded-full hover:from-red-700 hover:to-black transition-all duration-300 shadow-lg shadow-red-500/40 hover:shadow-xl hover:shadow-red-500/60 hover:-translate-y-0.5 font-semibold">Contacto</a></li>
+                        </ul>
+        </div>
+        
+                        {/* Menú móvil separado */}
+                        <div className={`md:hidden transition-all duration-300 ease-in-out ${isMenuOpen ? 'max-h-96 opacity-100' : 'max-h-0 opacity-0'} overflow-hidden`}>
+                        <ul className="pb-4 space-y-2">
+                        <li><a href="#inicio" onClick={() => setIsMenuOpen(false)} className="block py-3 px-4 text-gray-700 hover:text-gray-900 hover:bg-gray-50 rounded-lg font-medium transition-colors">Inicio</a></li>
+                        <li><a href="#proyectos" onClick={() => setIsMenuOpen(false)} className="block py-3 px-4 text-gray-700 hover:text-gray-900 hover:bg-gray-50 rounded-lg font-medium transition-colors">Proyectos</a></li>
+                        <li><a href="#servicios" onClick={() => setIsMenuOpen(false)} className="block py-3 px-4 text-gray-700 hover:text-gray-900 hover:bg-gray-50 rounded-lg font-medium transition-colors">Servicios</a></li>
+                        <li><a href="#sobre-mi" onClick={() => setIsMenuOpen(false)} className="block py-3 px-4 text-gray-700 hover:text-gray-900 hover:bg-gray-50 rounded-lg font-medium transition-colors">Sobre Mí</a></li>
+                        <li><a href="#contacto" onClick={() => setIsMenuOpen(false)} className="block mx-4 mt-2 bg-gradient-to-r from-red-700 to-black text-white px-6 py-3 rounded-full text-center font-semibold">Contacto</a></li>
                         </ul>
                     </div>
                 </div>
@@ -289,36 +327,60 @@ const ArchitectWebsite = () => {
                             </div>
                         </div>
 
-                        <div className="space-y-6">
+                        <form ref={formRef} onSubmit={handleContactSubmit} className="space-y-6">
                             <h4 className="text-3xl font-bold mb-8">Envíame un mensaje</h4>
+
+                            {submitStatus === 'success' && (
+                                <div className="bg-green-500/20 border border-green-500/30 text-green-300 p-4 rounded-2xl">
+                                     ¡Mensaje enviado exitosamente! Te contactaré pronto.
+                                </div>
+                            )}
+
+                            {submitStatus === 'error' && (
+                                 <div className="bg-red-500/20 border border-red-500/30 text-red-300 p-4 rounded-2xl">
+                                    Error al enviar el mensaje. Por favor intenta nuevamente.
+                                 </div>
+                            )}
+
                             <div>
-                                <input 
-                                    type="text" 
-                                    placeholder="Tu nombre" 
+                                <input
+                                    type="text"
+                                    name="user_name"    
+                                    placeholder="Tu Nombre"
+                                    required
                                     className="w-full p-4 rounded-2xl bg-white/10 backdrop-blur-xl border border-white/20 text-white placeholder-gray-300 focus:outline-none focus:border-white/50 transition-colors"
                                 />
                             </div>
                             <div>
                                 <input 
-                                    type="email" 
-                                    placeholder="Tu email" 
+                                    type="email"
+                                    name="user_email"
+                                    placeholder="Tu email"
+                                    required
                                     className="w-full p-4 rounded-2xl bg-white/10 backdrop-blur-xl border border-white/20 text-white placeholder-gray-300 focus:outline-none focus:border-white/50 transition-colors"
                                 />
                             </div>
                             <div>
                                 <textarea 
-                                    placeholder="Cuéntame sobre tu proyecto" 
+                                    name="message"
+                                    placeholder="Cuéntame sobre tu proyecto"
                                     rows={4}
+                                    required
                                     className="w-full p-4 rounded-2xl bg-white/10 backdrop-blur-xl border border-white/20 text-white placeholder-gray-300 focus:outline-none focus:border-white/50 transition-colors resize-none"
                                 ></textarea>
                             </div>
                             <button 
-                                onClick={handleContactSubmit}
-                                className="w-full bg-gradient-to-r from-red-700 to-red-600 py-4 rounded-2xl font-semibold hover:from-red-800 hover:to-red-900 transition-all duration-300 shadow-xl hover:shadow-2xl hover:-translate-y-1"
+                                type="submit"
+                                disabled={isSubmitting}
+                                className={`w-full py-4 rounded-2xl font-semibold transition-all duration-300 shadow-xl hover:shadow-2xl hover:-translate-y-1 ${
+                                    isSubmitting 
+                                        ? 'bg-gray-600 cursor-not-allowed' 
+                                        : 'bg-gradient-to-r from-red-700 to-red-600 hover:from-red-800 hover:to-red-900'
+                                }`}
                             >
-                                Enviar mensaje
+                                {isSubmitting ? 'Enviando...' : 'Enviar mensaje'}
                             </button>
-                        </div>
+                        </form>
                     </div>
                 </div>
             </section>
